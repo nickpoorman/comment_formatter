@@ -1,4 +1,4 @@
-package main
+package formatter
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 	"github.com/nickpoorman/comment_formatter/stringslice"
 )
 
-func format(commentPrefix string, lines []string, lineNumber int, lineLength int) []string {
+func Format(commentPrefix string, lines []string, lineNumber int, lineLength int) []string {
 	if lines == nil || len(lines) == 0 {
 		return lines
 	}
 
-	foundComment := isCommentBlock(commentPrefix, lines, lineNumber)
+	foundComment := IsCommentBlock(commentPrefix, lines, lineNumber)
 
 	indentation := determineIndentation(lines[lineNumber])
 	start, end := findCommentBlock(commentPrefix, lines, lineNumber)
@@ -120,7 +120,7 @@ func determineIndentation(line string) int {
 	return indentation
 }
 
-func isCommentBlock(commentPrefix string, lines []string, lineNumber int) bool {
+func IsCommentBlock(commentPrefix string, lines []string, lineNumber int) bool {
 	return strings.HasPrefix(strings.TrimSpace(lines[lineNumber]), commentPrefix)
 }
 

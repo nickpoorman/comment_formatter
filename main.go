@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/nickpoorman/comment_formatter/formatter"
 )
 
 type SubBlock struct {
@@ -60,12 +62,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !isCommentBlock(commentPrefix, lines, lineNumber) {
+	if !formatter.IsCommentBlock(commentPrefix, lines, lineNumber) {
 		fmt.Println("Line is not part of a comment block")
 		os.Exit(1)
 	}
 
-	output := format(commentPrefix, lines, lineNumber, lineLength)
+	output := formatter.Format(commentPrefix, lines, lineNumber, lineLength)
 
 	writeFile(filePath, output)
 }

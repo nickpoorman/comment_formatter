@@ -1,4 +1,4 @@
-package main
+package formatter
 
 import (
 	"testing"
@@ -83,7 +83,7 @@ func TestFormat(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := format(c.commentPrefix, c.lines, c.lineNumber, c.lineLength)
+		actual := Format(c.commentPrefix, c.lines, c.lineNumber, c.lineLength)
 		if len(actual) != len(c.expected) {
 			t.Errorf("format(%q, %q, %d, %d) == %q, expected %q", c.commentPrefix, c.lines, c.lineNumber, c.lineLength, actual, c.expected)
 		}
