@@ -15,6 +15,49 @@ func TestFormat(t *testing.T) {
 		expected      []string
 	}{
 		{
+			commentPrefix: "//", // test wrong comment prefix
+			lines: []string{
+				"    # foo ",
+				"    # bar",
+				"    #",
+			},
+			lineNumber: 0,
+			lineLength: 80,
+			expected: []string{
+				"    # foo ",
+				"    # bar",
+				"    #",
+			},
+		},
+		{
+			commentPrefix: "#",
+			lines: []string{
+				"    # Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod",
+				"    # tempor incididunt ut labore et dolore magna aliqua.",
+				"    #",
+				"    # Ut enim ad",
+				"    # minim veniam, quis nostrud exercitation ullamco laboris nisi ut",
+				"    # aliquip ex ea commodo consequat.",
+				"    # ",
+				"    # Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+				"    # Excepteur sint occaecat",
+				"    # cupidatat non proident, sunt in culpa qui officia deserunt mollit",
+				"    # anim id est laborum.",
+			},
+			lineNumber: 0,
+			lineLength: 80,
+			expected: []string{
+				"    # Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod",
+				"    # tempor incididunt ut labore et dolore magna aliqua.",
+				"    #",
+				"    # Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut",
+				"    # aliquip ex ea commodo consequat.",
+				"    #",
+				"    # Duis aute irure dolor in reprehenderit in voluptate velit esse cillum",
+				"    # dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non",
+				"    # proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+			},
+		}, {
 			commentPrefix: "//",
 			lines: []string{
 				"// This is a comment block.",
@@ -87,10 +130,8 @@ func TestFormat(t *testing.T) {
 		if len(actual) != len(c.expected) {
 			t.Errorf("format(%q, %q, %d, %d) == %q, expected %q", c.commentPrefix, c.lines, c.lineNumber, c.lineLength, actual, c.expected)
 		}
-		for i := range actual {
-			if actual[i] != c.expected[i] {
-				t.Errorf("format(%q, %q, %d, %d) == %q, expected %q", c.commentPrefix, c.lines, c.lineNumber, c.lineLength, actual, c.expected)
-			}
+		if !assert.Equal(t, c.expected, actual) {
+			t.Errorf("format(%q, %q, %d, %d) == %q, expected %q", c.commentPrefix, c.lines, c.lineNumber, c.lineLength, actual, c.expected)
 		}
 	}
 }
@@ -119,7 +160,7 @@ func TestJoinSubBlocksWithEmptyCommentLines(t *testing.T) {
 		},
 	}
 
-	actual := joinSubBlocksWithEmptyCommentLines("//", block)
+	actual := joinSubBlocksWithEmptyCommentLines("//", 0, block)
 	if len(actual) != len(expected) {
 		t.Errorf("joinSubBlocksWithEmptyCommentLines(%q, %q) == %q, expected %q", "//", block, actual, expected)
 	}

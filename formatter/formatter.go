@@ -13,12 +13,19 @@ func Format(commentPrefix string, lines []string, lineNumber int, lineLength int
 	}
 
 	foundComment := IsCommentBlock(commentPrefix, lines, lineNumber)
+	// If we don't find a comment block then we should return the whole original lines.
+	if !foundComment {
+		return lines
+	}
 
 	indentation := determineIndentation(lines[lineNumber])
 	start, end := findCommentBlock(commentPrefix, lines, lineNumber)
 
+	commentBlock := lines[start : end+1]
+	commentBlock = trimWhiteSpaceFromLines(commentBlock)
+
 	// Break the comment block into multiple comment blocks when there is an empty comment line separating them.
-	blocks := splitCommentBlock(commentPrefix, lines[start:end+1])
+	blocks := splitCommentBlock(commentPrefix, commentBlock)
 
 	// Format each of the blocks that have been seperated by comments.
 	formattedBlock := formatBlocks(commentPrefix, indentation, lineLength, blocks)
@@ -30,6 +37,14 @@ func Format(commentPrefix string, lines []string, lineNumber int, lineLength int
 
 	// Update the lines
 	return replaceLines(lines, start, end, formattedBlock)
+}
+
+func trimWhiteSpaceFromLines(block []string) []string {
+	var trimmedBlock []string
+	for _, line := range block {
+		trimmedBlock = append(trimmedBlock, strings.TrimSpace(line))
+	}
+	return trimmedBlock
 }
 
 // Format blocks that have been seperated by empty comment lines
@@ -44,7 +59,7 @@ func formatBlocks(commentPrefix string, indentation int, lineLength int, blocks 
 	}
 
 	// Join the blocks by inserting an empty comment line between them.
-	joinedSubBlocks := joinSubBlocksWithEmptyCommentLines(commentPrefix, wrappedSubBlocks)
+	joinedSubBlocks := joinSubBlocksWithEmptyCommentLines(commentPrefix, indentation, wrappedSubBlocks)
 
 	// Flatten all the blocks
 	return stringslice.Flatten(joinedSubBlocks)
@@ -74,7 +89,7 @@ func isEmptyLine(commentPrefix string, line string) bool {
 }
 
 // Insert empty line between sub blocks.
-func joinSubBlocksWithEmptyCommentLines(commentPrefix string, subBlocks [][]string) [][]string {
+func joinSubBlocksWithEmptyCommentLines(commentPrefix string, indentation int, subBlocks [][]string) [][]string {
 	var out [][]string
 
 	for i, block := range subBlocks {
@@ -83,7 +98,7 @@ func joinSubBlocksWithEmptyCommentLines(commentPrefix string, subBlocks [][]stri
 
 		// Append a empty comment line block only if we are not on the last block.
 		if i != len(subBlocks)-1 {
-			out = append(out, []string{commentPrefix})
+			out = append(out, []string{indentLine(indentation, commentPrefix)})
 		}
 	}
 
